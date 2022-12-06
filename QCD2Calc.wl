@@ -519,16 +519,25 @@ rulesForComputeInt[p_] := {
 	HoldPattern@Int[\[Delta]1[krlt_] subexpr_., kList__] :> 
 		Module[{ik = FirstPosition[{kList}[[All,1]], p, Missing["NotFound"], {1}, Heads->False],
 				k, klb, kub,
-				k0},
+				c, k0},
 			(
 			ik = First[ik];
 			k = {kList}[[ik,1]]; klb = {kList}[[ik,2]]; kub = {kList}[[ik,3]];
-			k0 = (-Coefficient[krlt, k, 0]/Coefficient[krlt, k]);
+			c = Coefficient[krlt, k];
+			k0 = (-Coefficient[krlt, k, 0]/c);
 			If[Length[{kList}] == 1,
-				(-\[DoubleStruckCapitalD][subexpr, k]/.k->k0) (If[klb===-\[Infinity], 1, \[Theta][k0-klb]] If[kub===+\[Infinity], 1, \[Theta][kub-k0]])/Abs@Coefficient[krlt, k],
+				Plus[
+					(-\[DoubleStruckCapitalD][subexpr, k]/.k->k0) If[klb===-\[Infinity], 1, \[Theta][k0-klb]] If[kub===+\[Infinity], 1, \[Theta][kub-k0]],
+					(subexpr/.k->kub) \[Delta][kub-k0],
+					-(subexpr/.k->klb) \[Delta][k0-klb]
+				] / (Sign[c] c^2),
 			(*Else*)
 				Int[
-					(-\[DoubleStruckCapitalD][subexpr, k]/.k->k0) (If[klb===-\[Infinity], 1, \[Theta][k0-klb]] If[kub===+\[Infinity], 1, \[Theta][kub-k0]])/Abs@Coefficient[krlt, k],
+					Plus[
+						(-\[DoubleStruckCapitalD][subexpr, k]/.k->k0) If[klb===-\[Infinity], 1, \[Theta][k0-klb]] If[kub===+\[Infinity], 1, \[Theta][kub-k0]],
+						(subexpr/.k->kub) \[Delta][kub-k0],
+						-(subexpr/.k->klb) \[Delta][k0-klb]
+					] / ((Sign[c] c^2)),
 					Sequence@@Delete[{kList}, ik]
 				]
 			]
